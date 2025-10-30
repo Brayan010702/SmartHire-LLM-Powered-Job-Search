@@ -83,5 +83,8 @@ async def main(message: cl.Message):
         await cl.Message(content="Please select an assistant first!").send()
         return
 
-    result = model.predict(message.content)["output"]
+    result = model.predict(message.content)
+    # Handle different return formats from different models
+    if isinstance(result, dict):
+        result = result.get("text", result.get("output", str(result)))
     await cl.Message(content=result).send()

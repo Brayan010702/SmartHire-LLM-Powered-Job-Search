@@ -39,3 +39,12 @@ def extract_text_from_pdf(pdf_bytes: BytesIO) -> str:
     # TODO: Use PyPDF2.PdfReader to open the input `pdf_bytes` and extract the text from each page appended to `pdf_text`.
     # Hint: Use the `extract_text()` method of the `PyPDF2.PdfReader` object.
 
+    # Create a PdfReader object from the input BytesIO
+    pdf_reader = PyPDF2.PdfReader(pdf_bytes)
+
+    # Iterate over each page in the PDF
+    for page in pdf_reader.pages:
+        # Extract text from the current page and append to pdf_text
+        pdf_text += page.extract_text()
+
+    return pdf_text

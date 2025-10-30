@@ -25,27 +25,52 @@ class ChatAssistant:
         history_length : int, optional
             The length of the conversation history to be stored in memory. Default is 3.
         """
-        # TODO: Create a string template for the chat assistant. It must indicate the LLM
+        # TODO 1: Create a string template for the chat assistant. It must indicate the LLM
         # that a chat history is being provided and that a new question is being asked.
         # The template must have two input variables: `history` and `human_input`.
-        
-        
 
-        # TODO: Create a prompt template using the string template created above.
+        template = """You are a helpful AI assistant. Use the following conversation history and the new question to provide a helpful response.
+
+Conversation History:
+{history}
+
+New Question: {human_input}
+
+Answer:"""
+
+        # TODO 2: Create a prompt template using the string template created above.
         # Hint: Use the `langchain.prompts.PromptTemplate` class.
         # Hint: Don't forget to add the input variables: `history` and `human_input`.
-        self.prompt = 
+        self.prompt = PromptTemplate(
+            input_variables=["history", "human_input"],
+            template=template
+        )
 
-        # TODO: Create an instance of an LLM using the `get_llm` factory function with the appropriate settings.
+        # TODO 3: Create an instance of an LLM using the `get_llm` factory function with the appropriate settings.
         # Remember some settings are being provided in the __init__ function for this class.
         # Hint: You need to pass `model`, `api_key`, `temperature`, and `provider` parameters.
-        self.llm = 
+        self.llm = get_llm(
+            model=llm_model,
+            api_key=api_key,
+            temperature=temperature,
+            provider=settings.LLM_PROVIDER
+        )
 
-        # TODO: Create an instance of `langchain.chains.LLMChain` with the appropriate settings.
+        # TODO 4: Create an instance of `langchain.chains.LLMChain` with the appropriate settings.
         # This chain must combine our prompt, llm and also have a memory.
         # Hint: You can use the `langchain.memory.ConversationBufferWindowMemory` class with
-        # `k=history_length``.
-        self.model = 
+        # `k=history_length`.
+        _memory = ConversationBufferWindowMemory(
+            memory_key="history",
+            k=history_length
+        )
+
+        self.model = LLMChain(
+            llm=self.llm,
+            prompt=self.prompt,
+            memory=_memory,
+            verbose=settings.LANGCHAIN_VERBOSE
+        )
 
     def predict(self, human_input: str) -> str:
         """
@@ -70,7 +95,7 @@ if __name__ == "__main__":
     # Determine which model and API key to use based on provider
     llm_model = settings.OPENAI_LLM_MODEL if settings.LLM_PROVIDER == "openai" else settings.GEMINI_LLM_MODEL
     api_key = settings.OPENAI_API_KEY if settings.LLM_PROVIDER == "openai" else settings.GOOGLE_API_KEY
-    
+
     # Create an instance of ChatAssistant with appropriate settings
     chat_assistant = ChatAssistant(
         llm_model=llm_model,
